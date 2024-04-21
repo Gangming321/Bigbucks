@@ -1,3 +1,5 @@
+### Before you use, add a config.py file to /modules, which includes a line like api_key = "<your api key>"
+
 ### How to run?
 python /path/to/run.py
 
