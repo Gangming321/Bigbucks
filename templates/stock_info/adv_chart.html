@@ -1,0 +1,464 @@
+{% include 'header.html' %}
+<br>
+{% include 'sidebar.html' %}
+<br>
+{% block content %}
+ <h2>charting feature</h2>
+  <form id="chartForm" method="post" action="">
+    <label for="stockSymbol">Ticker:</label>
+    <input type="text" name="stockSymbol" id="stockSymbol" required>
+    <select id="chart_type" name="chart_type">
+        <option value="Historical">Historical</option>
+        <option value="Simple Return">Simple Return</option>
+        <option value="Yesterday vs Today">Yesterday vs Today</option>
+        <option value="Histogram of Simple Returns">Histogram of Simple Returns</option>
+        <option value="Daily Returns vs S&P500">Daily Returns vs S&P500</option>
+        <option value="Daily % Change vs S&P500">Daily % Change vs S&P500</option>
+        <option value="Scatter Graph of X vs S&P500">Scatter Graph of X vs S&P500</option>
+        <option value="Historical Volume">Historical Volume</option>
+        <option value="Volume Change">Volume Change</option>
+        <option value="Volume Change vs Price Change">Volume Change vs Price Change</option>
+    </select>
+    <input type="submit" value="Draw Chart">
+  </form>
+
+  <script>
+  document.getElementById('chartForm').onsubmit = function() {
+    var stockSymbol = document.getElementById('stockSymbol').value;
+    this.action = '/info/' + encodeURIComponent(stockSymbol) + '/adv_chart';
+  };
+  </script>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // 解析当前URL以获取股票符号
+    var pathArray = window.location.pathname.split('/');
+    var stockSymbol = pathArray[2]; // 假设股票符号总是位于第三个段落
+  
+    // 设置表单的股票符号输入框的值
+    document.getElementById('stockSymbol').value = stockSymbol;
+  
+    // 更新表单的提交action，确保提交到正确的URL
+    document.getElementById('chartForm').onsubmit = function() {
+      this.action = '/info/' + encodeURIComponent(stockSymbol) + '/adv_chart';
+    };
+  });
+  </script>
+  
+
+  {% if price %}
+    <div role="alert">
+      <label>Stock: {{ stockSymbol }}</label>
+      <label>Price: {{ price }} USD</label>
+    </div>
+    <script src="https://cdn.plot.ly/plotly-2.15.0.min.js"></script>
+    <script src="../static/stock.js"></script>  <!--该写什么-->
+    <script>
+      makeplot("{{ stockSymbol }}", "{{ chart_type }}")
+    </script>
+  {% endif %}
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js" integrity="sha384-w76AqPfDkMBDXo30jS1Sgez6pr3x5MlQ1ZAGC+nuZB+EYdgRZgiwxhTBTkF7CXvN" crossorigin="anonymous"></script>
+
+
+{% endblock %}
+
+<br><!--Chart Type = {{chart_type}}
+    Data:
+    {{chart_data}}-->
+    
+    <html lang="en">
+    <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chart</title>
+    <!-- Load Plotly.js -->
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <style>
+        /* Add some basic styling */
+        #chart {
+            max-width: 800px;
+            margin: 50px auto;
+        }
+    </style>
+    </head>
+    <body>
+    
+    <div id="chart"></div>
+    
+    <script>
+    // Define the data
+    var chartType = "{{chart_type}}";
+    var chartData = {{chart_data | tojson | safe}}; // Convert data to JSON format
+    
+    // 1Check if the chart type is "Historical"
+    if (chartType === "Historical") {
+        // Extract dates and adj_close values from the data
+        var dates = chartData.dates;
+        var adjClose = chartData.adj_close;
+    
+        // Create traces for the line graph
+        var trace1 = {
+            x: dates,
+            y: adjClose,
+            type: 'scatter',
+            mode: 'lines',
+            name: 'Adjusted Close'
+        };
+    
+        // Define layout options
+        var layout = {
+            title: 'Historical Stock Data',
+            xaxis: {
+                title: 'Date'
+            },
+            yaxis: {
+                title: 'Adjusted Close'
+            }
+        };
+    
+        var data = [trace1];
+        Plotly.newPlot('chart', data, layout);
+    } 
+    
+    //2
+    else if (chartType === "Simple Return") {
+        // Extract dates and simple_returns values from the data
+        var dates = chartData.dates;
+        var simpleReturns = chartData.simple_returns;
+    
+        var trace1 = {
+            x: dates,
+            y: simpleReturns,
+            mode: 'markers',
+            type: 'scatter',
+            name: 'Simple Returns'
+        };
+    
+        var layout = {
+            title: 'Simple Returns',
+            xaxis: {
+                title: 'Date'
+            },
+            yaxis: {
+                title: 'Simple Returns(%)',
+                tickformat: ',.2%'
+            }
+        };
+    
+        var data = [trace1];
+        Plotly.newPlot('chart', data, layout);}
+    
+    //3
+    else if (chartType === "Yesterday vs Today") {
+        var yesterdayData = chartData.yesterday;
+        var todayData = chartData.today;
+    
+        var trace1 = {
+            x: yesterdayData,
+            y: todayData,
+            mode: 'markers',
+            type: 'scatter',
+            name: 'Yesterday vs Today',
+            marker: {
+                color: 'rgba(255, 0, 0, 0.5)' // Adjust marker color and opacity
+            }
+        };
+    
+        var layout = {
+            title: 'Yesterday vs Today',
+            xaxis: {
+                title: 'Yesterday Returns',
+                zeroline: false
+            },
+            yaxis: {
+                title: 'Today Returns',
+                zeroline: false
+            }
+        };
+    
+        var data = [trace1];
+        Plotly.newPlot('chart', data, layout);}
+    
+    //4
+    else if (chartType === 'Histogram of Simple Returns') {
+        var simpleReturns = chartData.simple_returns;
+        // Calculate the bin width
+        var max = Math.max(...simpleReturns);
+        var min = Math.min(...simpleReturns);
+        var span = max - min;
+        var binWidth = span / Math.sqrt(simpleReturns.length)/2;
+    
+        // Generate bins
+        var numBins = Math.ceil((max - min) / binWidth);
+        var bins = Array.from({ length: numBins }, (_, i) => min + i * binWidth);
+    
+        // Count frequencies
+        var frequencies = Array.from({ length: numBins }, () => 0);
+        simpleReturns.forEach(value => {
+            var binIndex = Math.floor((value - min) / binWidth);
+            frequencies[binIndex]++;
+        });
+    
+        var data = [{
+            x: bins.map(bin => bin.toFixed(4)),
+            y: frequencies,
+            type: 'bar',
+            marker: {
+                color: 'rgba(54, 162, 235, 0.5)',
+                line: {
+                    color: 'rgba(54, 162, 235, 1)',
+                    width: 1
+                }
+            }
+        }];
+    
+        var layout = {
+            title: 'Histogram of Simple Returns',
+            xaxis: {
+                title: 'Bins'
+            },
+            yaxis: {
+                title: 'Frequency'
+            }
+        };
+    
+        Plotly.newPlot('chart', data, layout);}
+    
+    
+    //5
+    else if (chartType === 'Daily Returns vs S&amp;P500') {
+    
+        const dates = chartData.dates;
+        const stockReturns = chartData.stock_returns;
+        const spyReturns = chartData.spy_returns;
+    
+        // Create traces for stock and S&P500 returns
+        const trace1 = {
+            x: dates,
+            y: stockReturns,
+            mode: 'lines',
+            name: 'Stock Cummulative Returns',
+            line: {
+                color: 'blue',
+                width: 1
+            }
+        };
+    
+        const trace2 = {
+            x: dates,
+            y: spyReturns,
+            mode: 'lines',
+            name: 'S&P500 Cummulative Returns',
+            line: {
+                color: 'red',
+                width: 1
+            }
+        };
+    
+        const layout = {
+            title: 'Stock Cummulative Returns vs SPY Cummulative Returns',
+            xaxis: {
+                title: 'Date'
+            },
+            yaxis: {
+                title: 'Cummulative Returns'
+            }
+        };
+        
+        Plotly.newPlot('chart', [trace1, trace2], layout);}
+    
+    //6
+    else if (chartType === 'Daily % Change vs S&amp;P500') {
+    
+      const dates = chartData.dates;
+      const stockReturns = chartData.stock_returns; 
+      const spyReturns = chartData.spy_returns;
+    
+      const trace1 = {
+            x: dates,
+            y: stockReturns,
+            mode: 'lines',
+            name: 'Stock Returns',
+            line: {
+                color: 'blue',
+                width: 1
+            }
+        };
+    
+        const trace2 = {
+            x: dates,
+            y: spyReturns,
+            mode: 'lines',
+            name: 'S&P500 Returns',
+            line: {
+                color: 'red',
+                width: 1
+            }
+        };
+    
+        const layout = {
+            title: 'Daily % Change vs S&P500',
+            xaxis: {
+                title: 'Date'
+            },
+            yaxis: {
+                title: 'Daily Returns (%)'
+            }
+        };
+        
+        Plotly.newPlot('chart', [trace1, trace2], layout);}
+    
+    
+    //7
+    else if (chartType === 'Scatter Graph of X vs S&amp;P500'){
+        var spyReturns = chartData.spy_returns;
+        var stockReturns = chartData.stock_returns; 
+    
+        var trace1 = {
+            x: spyReturns,
+            y: stockReturns,
+            mode: 'markers',
+            type: 'scatter',
+            name: 'Stock Returns'
+        };
+    
+        // Calculate the linear regression line
+        var n = spyReturns.length;
+    var sum_x = 0, sum_y = 0, sum_xy = 0, sum_x2 = 0;
+    
+    for (var i = 0; i < n; i++) {
+        sum_x += spyReturns[i];
+        sum_y += stockReturns[i];
+        sum_xy += spyReturns[i] * stockReturns[i];
+        sum_x2 += spyReturns[i] * spyReturns[i];
+    }
+    
+    // 计算斜率（slope）和截距（intercept）
+    var m = (n * sum_xy - sum_x * sum_y) / (n * sum_x2 - sum_x * sum_x);
+    var b = (sum_y - m * sum_x) / n;
+    
+    var regressionLine = {
+        x: spyReturns,
+        y: spyReturns.map(function(spyReturn) {
+            return m * spyReturn + b;
+        }),
+        mode: 'lines',
+        type: 'scatter',
+        name: 'Regression Line',
+        line: {
+            color: 'red',
+            width: 2,
+        }
+    };
+    
+        var layout = {
+            title: 'Scatter Graph of X vs S&P500',
+            xaxis: {
+                title: 'Date',
+                tickformat: ',.2%'
+            },
+            yaxis: {
+                title: 'Simple Returns(%)',
+                tickformat: ',.2%'
+            }
+        };
+    
+        var data = [trace1, regressionLine];
+        Plotly.newPlot('chart', data, layout);}
+    
+        //8
+        else if (chartType === "Historical Volume") {
+            var dates = chartData.dates;
+            var volume = chartData.volume;
+        
+            var trace1 = {
+                x: dates,
+                y: volume,
+                type: 'bar',
+                name: 'Volume'
+            };
+        
+            var layout = {
+                title: 'Historical volume',
+                xaxis: {
+                    title: 'Date'
+                },
+                yaxis: {
+                    title: 'volume'
+                }
+            };
+        
+            var data = [trace1];
+            Plotly.newPlot('chart', data, layout);
+        } 
+
+    //9
+        else if (chartType === "Volume Change") {
+            var dates = chartData.dates;
+            var volume_change = chartData.volume_change;
+        
+            var trace1 = {
+                x: dates,
+                y: volume_change,
+                type: 'scatter',
+                mode: 'lines',
+                name: 'volume change'
+            };
+        
+            var layout = {
+                title: 'Volume Change',
+                xaxis: {
+                    title: 'Date'
+                },
+                yaxis: {
+                    title: 'volume change'
+                }
+            };
+        
+            var data = [trace1];
+            Plotly.newPlot('chart', data, layout);
+        } 
+    
+    //10
+    else if (chartType === "Volume Change vs Price Change") {
+        var volume_change = chartData.volume_change;
+        var price_change = chartData.price_change;
+    
+        var trace1 = {
+            x: price_change,
+            y: volume_change,
+            mode: 'markers',
+            type: 'scatter',
+            name: 'Volume Change vs Price Change',
+            marker: {
+                color: 'rgba(255, 0, 0, 0.5)' 
+            }
+        };
+    
+        var layout = {
+            title: 'Volume Change vs Price Change',
+            xaxis: {
+                title: 'Price Change',
+                zeroline: false
+            },
+            yaxis: {
+                title: 'Volume Change',
+                zeroline: false
+            }
+        };
+    
+        var data = [trace1];
+        Plotly.newPlot('chart', data, layout);}
+    
+
+    else {
+        console.log("Unsupported chart type: " + chartType);
+    }
+    </script>
+    
+    </body>
+    </html>
+    
+    

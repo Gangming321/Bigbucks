@@ -1,0 +1,174 @@
+{% include 'header.html' %} 
+<br><br><br><br>
+
+
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Efficient Frontier</title>
+    <script src="https://cdn.staticfile.net/Chart.js/3.9.1/chart.js"></script>
+</head>
+<body>
+    <h4>restricted_efficient_frontier: {{ res_efficient_frontier }}</h4>
+    <h4>unrestircted_efficient_frontier: {{ unres_efficient_frontier }}</h4>
+    <h4>sharpe_ratio: {{ sharpe_ratio}}</h4>
+    <h4>weighted_return_and_risk: {{ weighted_return_and_risk}}</h4>
+    <!-- 画一个散点图展示res_efficient_frontier -->
+    <canvas id="scatterPlot1" width="800" height="400"></canvas>
+
+    <script>
+        var res_efficient_frontier = {{ res_efficient_frontier | tojson | safe }};
+        // 散点图数据
+        var scatterChartData1 = {
+            datasets: [{
+                label: 'Res Efficient Frontier',
+                data: res_efficient_frontier,
+                backgroundColor: 'blue' // 散点颜色
+            }]
+        };
+
+        // 获取 canvas 元素
+        var ctx = document.getElementById('scatterPlot1').getContext('2d');
+
+        // 创建散点图
+        var scatterChart1 = new Chart(ctx, {
+            type: 'scatter',
+            data: scatterChartData1,
+            options: {
+                scales: {
+                    x: {
+                        type: 'linear', // X 轴为线性刻度
+                        position: 'bottom'
+                    },
+                    y: {
+                        type: 'linear', // Y 轴为线性刻度
+                        position: 'left'
+                    }
+                }
+            }
+        });
+
+            // 计算趋势线的函数
+            function calculateTrendLineData(data) {
+                var sumX = 0;
+                var sumY = 0;
+                var sumXY = 0;
+                var sumXSquare = 0;
+                var n = data.length;
+
+                for (var i = 0; i < n; i++) {
+                    sumX += data[i][0];
+                    sumY += data[i][1];
+                    sumXY += data[i][0] * data[i][1];
+                    sumXSquare += data[i][0] * data[i][0];
+                }
+
+                var slope = (n * sumXY - sumX * sumY) / (n * sumXSquare - sumX * sumX);
+                var intercept = (sumY - slope * sumX) / n;
+
+                var trendLineData = [];
+                for (var i = 0; i < n; i++) {
+                    trendLineData.push({ x: data[i][0], y: slope * data[i][0] + intercept });
+                }
+
+                return trendLineData;
+            }
+
+        // 计算趋势线数据
+        var trendLineData = calculateTrendLineData(res_efficient_frontier);
+
+        // 添加趋势线到图表
+        scatterChart1.data.datasets.push({
+            label: 'Trend Line',
+            data: trendLineData,
+            backgroundColor: 'transparent',
+            borderColor: 'black', // 趋势线颜色
+            type: 'line'
+        });
+        scatterChart1.update(); // 更新图表以显示趋势线
+
+    </script>
+
+<!-- 画一个散点图展示res_efficient_frontier -->
+<canvas id="scatterPlot2" width="800" height="400"></canvas>
+
+<script>
+    var unres_efficient_frontier = {{ unres_efficient_frontier | tojson | safe }};
+            // 散点图数据
+            var scatterChartData2 = {
+        datasets: [{
+            label: 'Unres Efficient Frontier',
+            data: unres_efficient_frontier,
+            backgroundColor: 'red' // 散点颜色
+        }]
+    };
+
+    // 获取 canvas 元素
+    var ctx = document.getElementById('scatterPlot2').getContext('2d');
+
+    // 创建散点图
+    var scatterChart2 = new Chart(ctx, {
+        type: 'scatter',
+        data: scatterChartData2,
+        options: {
+            scales: {
+                x: {
+                    type: 'linear', // X 轴为线性刻度
+                    position: 'bottom'
+                },
+                y: {
+                    type: 'linear', // Y 轴为线性刻度
+                    position: 'left'
+                }
+            }
+        }
+    });
+
+            // 计算趋势线的函数
+            function calculateTrendLineData(data) {
+                var sumX = 0;
+                var sumY = 0;
+                var sumXY = 0;
+                var sumXSquare = 0;
+                var n = data.length;
+
+                for (var i = 0; i < n; i++) {
+                    sumX += data[i][0];
+                    sumY += data[i][1];
+                    sumXY += data[i][0] * data[i][1];
+                    sumXSquare += data[i][0] * data[i][0];
+                }
+
+                var slope = (n * sumXY - sumX * sumY) / (n * sumXSquare - sumX * sumX);
+                var intercept = (sumY - slope * sumX) / n;
+
+                var trendLineData = [];
+                for (var i = 0; i < n; i++) {
+                    trendLineData.push({ x: data[i][0], y: slope * data[i][0] + intercept });
+                }
+
+                return trendLineData;
+            }
+
+        // 计算趋势线数据
+        var trendLineData = calculateTrendLineData(res_efficient_frontier);
+
+        // 添加趋势线到图表
+        scatterChart2.data.datasets.push({
+            label: 'Trend Line',
+            data: trendLineData,
+            backgroundColor: 'transparent',
+            borderColor: 'black', // 趋势线颜色
+            type: 'line'
+        });
+        scatterChart2.update(); // 更新图表以显示趋势线
+</script>
+
+    </script>
+
+</body>
+</html>
+{% include 'footer.html' %}

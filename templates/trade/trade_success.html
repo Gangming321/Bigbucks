@@ -1,0 +1,66 @@
+{% include 'header.html' %} 
+
+<br>
+<br>
+<br>
+
+<br>
+
+{% include 'error_msg.html' %} 
+
+<br>
+<style>
+    /* Define styles for container */
+.contain_er {
+    margin: 20px auto;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    width: 40%; /* Set width to 40% */
+}
+
+/* Define styles for headings */
+h3, h4 {
+    color: #333;
+}
+
+/* Define styles for order summary */
+.order-summary {
+    margin-top: 10px;
+}
+
+/* Define styles for buttons */
+button {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 5px;
+    background-color: #007bff;
+    color: #fff;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #0056b3;
+}
+
+</style>
+<body>
+
+<div class="contain_er">
+    <h3>Transaction Confirmed</h3>
+    <p>Thank you for choosing Bigbucks Inc, your order has been placed.</p>
+    <h4>Order Summary</h4>
+    <div class="order-summary">
+        <p>{{ data['Type']|capitalize }} {{ data['Amount'] }} of {{ data['Ticker']|upper  }} at ${{ data['Unit_price'] }}</p>
+        <p><strong>Total:</strong> ${{ data['Total'] }}</p>
+    </div>
+
+    <form action="{{ url_for('trade.trade_main') }}" method="get">
+        <button type="submit">Place another order</button>
+    </form>
+</div>
+
+</body>
+
+{% include 'footer.html' %}

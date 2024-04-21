@@ -1,0 +1,55 @@
+<div id="sidebar">
+      
+  <!-- <a class="navbar-brand" href="#">Stock Information</a> -->
+  <!-- <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation"> -->
+    <!-- <span class="navbar-toggler-icon"></span>
+  </button> -->
+
+  <!--<div class="collapse navbar-collapse" id="navbarNav">-->
+    <ul class="navbar-nav">
+      {% if symbol is defined %}
+      <li class="nav-item" ><a class="nav-link" href="{{ url_for('info.show_stock_info', symbol=symbol) }}">Main Info</a></li>
+      <li class="nav-item active"><a class="nav-link" href="{{ url_for('info.show_news', symbol=symbol) }}">News</a></li>
+      <li class="nav-item active"><a class="nav-link" href="{{ url_for('info.show_chart', symbol=symbol) }}">Charts</a></li>
+      {% endif %}
+      <!-- to be added -->
+    </ul>
+  <!--</div>-->
+</div>
+
+<style>
+#sidebar a{
+  border: 1px solid #ACACAC;
+  padding:10px 20px;
+  border-radius: 5px;
+  
+    color: rgb(255, 255, 255);
+    text-decoration: none;
+    background-color:rgb(0, 78, 131);
+    position:fixed;
+    width:10%;
+    height:20px;
+    top: 65px;
+    font-size: 20px;
+    text-align: center;
+    /*
+    border:5px rgb(255, 255, 255) dotted;
+    padding: 10px 10px;
+    margin: 0px;
+
+    width:20%;
+    position:fixed;
+    top: 58px; */
+
+
+}
+#sidebar li{
+    display: inline;
+    margin-right:20vw;
+}
+#sidebar a:hover{
+  text-decoration: underline;
+}
+</style>
+
+

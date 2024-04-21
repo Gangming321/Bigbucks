@@ -1,0 +1,8 @@
+numpy
+pandas
+flask
+sqlalchemy
+apscheduler
+gunicorn
+requests
+flask_sqlalchemy

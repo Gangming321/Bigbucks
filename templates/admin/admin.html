@@ -1,0 +1,68 @@
+{% include 'header.html' %} 
+<br><br><br><br>
+
+{% block header %}
+<h2 style="text-align: center;">Admin Dashboard</h2>
+{% endblock %}
+
+<br>
+
+{% include 'error_msg.html' %} 
+
+<style>
+    .dashboard-container {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 20px;
+        padding: 20px;
+    }
+
+    .dashboard-card {
+        background-color: #f0f0f0;
+        border-radius: 8px;
+        padding: 20px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        width: calc(33.33% - 20px);
+        max-width: 300px;
+    }
+
+    .dashboard-card h2 {
+        margin-top: 0;
+        font-size: 1.5rem;
+    }
+
+    .dashboard-card p {
+        margin-bottom: 10px;
+    }
+
+    .dashboard-link {
+        color: #2395f3;
+        text-decoration: none;
+        font-weight: bold;
+    }
+
+    .dashboard-link:hover {
+        text-decoration: underline;
+    }
+</style>
+
+<div class="dashboard-container">
+    <div class="dashboard-card">
+        <h2>Display stock position of all users</h2>
+        <p>View the current stock positions of all users.</p>
+        <a href="/admin/user_stock_list" class="dashboard-link">View Details</a>
+    </div>
+    <div class="dashboard-card">
+        <h2>Display today's transactions</h2>
+        <p>Get a summary of today's transactions.</p>
+        <a href="/admin/today_transaction_summary" class="dashboard-link">View Details</a>
+    </div>
+    <div class="dashboard-card">
+        <h2>Display all user risk return profile</h2>
+        <p>Explore the risk-return profiles of all users.</p>
+        <a href="/admin/all_user_risk_return_profile" class="dashboard-link">View Details</a>
+    </div>
+</div>
+
+{% include 'footer.html' %}

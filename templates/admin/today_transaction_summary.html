@@ -1,0 +1,93 @@
+{% include 'header.html' %} 
+<br><br><br><br>
+
+{% block header %}
+<h2>Daily Transaction Summary</h2>
+{% endblock %}
+
+<br>
+
+<div class="form-container">
+    <!-- 加载页面的时候设置默认日期为今天 -->
+    <body onload="setDefaultDate()">
+        <form action="" method="post">
+            <label for="date">Select Date:</label>
+            <input type="date" name="query_date" id="query_date">
+            <input type="submit" value="Submit">
+        </form>
+    </body>
+
+    <script>
+        function setDefaultDate() {
+            const today = new Date().toISOString().substring(0, 10);
+            document.getElementById('query_date').value = today;
+        }
+    </script>
+</div>
+
+<div class="transaction-table">
+    <form>
+        <table>
+            <tr>
+                <th>Symbol</th>
+                <th>Company Name</th>
+                <th>Buy Amount</th>
+                <th>Sell Amount</th>
+                <th>Transaction Date</th>
+            </tr>
+            {% for transaction in page_data %}
+            <tr>
+                <td>{{ transaction.symbol }}</td>
+                <td>{{ transaction.company_name }}</td>
+                <td>{{ transaction.buy_amount }}</td>
+                <td>{{ transaction.sell_amount }}</td>
+                <td>{{ transaction.transaction_date }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+    </form>
+</div>
+
+<button onclick="window.location.href='/admin'" class="back-button">Go back to /admin</button>
+
+{% include 'footer.html' %}
+
+<style>
+    .transaction-table {
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        overflow: hidden;
+        margin-top: 20px;
+    }
+
+    .transaction-table table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .transaction-table th, .transaction-table td {
+        padding: 8px;
+        text-align: left;
+        border-bottom: 1px solid #ddd;
+    }
+
+    .transaction-table th {
+        background-color: #f2f2f2;
+    }
+
+    .back-button {
+        background-color: #004085;
+        border: none;
+        font-size: 18px;
+        color: white;
+        padding: 12px;
+        text-align: center;
+        display: inline-block;
+        margin-top: 20px;
+        border-radius: 8px;
+    }
+
+    .back-button:hover {
+        background-color: #0266d0; /
+    }
+</style>

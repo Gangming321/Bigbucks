@@ -1,0 +1,101 @@
+{% include 'header.html' %}
+<br>
+<br>
+<h2>All User Risk Return Profile</h2>
+
+<h2>All Users Combined Portfolio</h2>
+<table class="container">
+    <tr>
+        <th>Symbol</th>
+        <th>Quantity</th>
+        <th>Unit Price</th>
+    </tr>
+    {% for symbol, details in all_users_portfolio.items() %}
+    <tr>
+        <td>{{ symbol }}</td>
+        <td>{{ details['quantity'] }}</td>
+        <td>${{ "%.2f"|format(details['unit_price']) }}</td>
+    </tr>
+    {% endfor %}
+</table>
+<p><strong>Combined Weighted Rate of Return:</strong> {{ "%.2f"|format(all_users_weighted_rate_of_return * 100) }}%</p>
+<p><strong>Combined Portfolio Volatility:</strong> {{ "%.2f"|format(all_users_portfolio_volatility * 100) }}%</p>
+<p><strong>Combined Sharpe Ratio:</strong> {{ all_users_sharpe_ratio }}</p>
+<br>
+
+{% for user_id, stocks in grouped_records.items() %}
+    <h3>User ID: {{ user_id }}</h3>
+    <h4>Stock Holdings:</h4>
+    <table class="container">
+        <tr>
+            <th>Symbol</th>
+            <th>Quantity</th>
+            <th>Unit Price</th>
+        </tr>
+        {% for symbol, details in stocks.items() %}
+        <tr>
+            <td>{{ symbol }}</td>
+            <td>{{ details['quantity'] }}</td>
+            <td>${{ "%.2f"|format(details['unit_price']) }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+    <p><strong>Weighted Rate of Return:</strong> {{ "%.2f"|format(weighted_rate_of_return_dict[user_id] * 100) }}%</p>
+    <p><strong>Portfolio Volatility:</strong> {{ "%.2f"|format(portfolio_volatility_dict[user_id] * 100) }}%</p>
+    <p><strong>Sharpe Ratio:</strong> {{ sharpe_ratio_dict[user_id] }}</p>
+    <br>
+{% endfor %}
+
+<button onclick="window.location.href='/admin'" class="back-button">Go back to /admin</button>
+
+<br><br>
+{% include 'footer.html' %}
+
+<style>        
+    .container {
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        padding: 15px;
+        margin-bottom: 20px;
+    }
+
+    .container h2 {
+        font-size: 24px;
+        margin-bottom: 10px;
+    }
+
+
+    .container th, .container td {
+        border: 1px solid #ddd;
+        padding: 8px;
+        text-align: left;
+    }
+
+    .container th {
+        background-color: #f2f2f2;
+    }
+
+    .container tr:nth-child(even) {
+        background-color: #f2f2f2;
+    }
+
+    .container tr:hover {
+        background-color: #ddd;
+    }
+
+    .back-button {
+        background-color: #004085;
+        border: none;
+        font-size: 18px;
+        color: white;
+        padding: 12px;
+        text-align: center;
+        display: inline-block;
+        margin-top: 20px;
+        border-radius: 8px;
+    }
+
+    .back-button:hover {
+        background-color: #0266d0; 
+    }
+</style>

@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>BigBucks</title>
+    <style>
+        header {
+            background-color:rgb(0, 39, 66);
+            height:50px;
+            width:100%;
+            position:fixed;  
+            top: 0;  
+        }
+        h1{
+            color: rgb(255, 255, 255);
+            position:absolute;
+            top:0;
+            line-height:20px;
+
+        }
+        header a{
+            color: rgb(255, 255, 255);
+            text-decoration: none;
+        }
+        header li{
+            
+            display: inline;
+            margin-right:4vw;
+        }
+        header ul{
+            
+            position:absolute;
+            right:5vw;
+            top:0;
+            line-height:30px;
+        }
+        header a:hover{
+            text-decoration: underline;
+        }
+
+
+        .register {
+            background-color: rgb(166, 194, 245);
+            height:20vh;            
+            width: 50vh;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .container-fluid{
+            background-color: hsla(1, 90%, 61%, 0.86);
+            height:10vh;
+            width: 50vh;
+
+        }
+        
+    </style>
+</head>
+<body><header>
+    <h1>Bigbucks</h1>
+    <nav>
+    <ul>
+    <!-- <li><a class="nav-link" href="{% if session.get('is_admin') == 1 %}http://127.0.0.1:5001/homepage/index_admin{% else %}{{ url_for('homepage.index') }}{% endif %}">Home</a></li> -->
+    <li><a href="/homepage/index">Home</a></li>
+    <li><a href="/trade/main">Buy/Sell Stocks</a></li>
+    <li><a href="/info/main">Stock Info</a></li>
+    <li><a href="/risk/efficient_frontier">Risk Analysis</a></li>
+    {% if session.get('is_admin') == 1 %}
+    <li><a href="/admin">Administration</a></li>
+    {% endif %}
+
+    </ul>
+    </nav>
+<!--<li><div class="nav-item">
+    <a class="nav-link" href="{{ url_for('homepage.index') }}">Home</a>
+</div></li>
+<li><div class="pageelement">
+    <a href="/trade/main">Buy/Sell Stocks</a>
+</div></li>
+
+<li><div class="pageelement">
+    <a href="/info/main">Stock Info</a>
+</div></li>-->
+            <!--图片加载不出来
+            background-image:url(/home/dy112/FORKBB/512bigbucks/Bigbucks/templates/Pic/logo.png) ;
+            background-repeat: no-repeat;
+            background-position: center;
+            width:210px;
+            text-indent: -9999px;-->
+</header>
+
+</body>
+

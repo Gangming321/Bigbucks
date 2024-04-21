@@ -1,0 +1,86 @@
+{% include 'header.html' %} 
+<br><br><br><br>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Efficient Frontier</title>
+    <script src="https://cdn.staticfile.net/Chart.js/3.9.1/chart.js"></script>
+</head>
+
+<body>
+    <div class="container" style="display: flex; justify-content: center; align-items: center;">
+        <div class="chart-container" style="max-width: 45%; margin-bottom: 20px;">
+            <h4 style="text-align: center;border: 2px solid rgb(0, 0, 138); padding: 5px;margin: 10px">sharpe ratio: {{ page_data['sharpe_ratio'] }}</h4>
+            <h4 style="text-align: center;border: 2px solid rgb(0, 0, 138); padding: 5px;margin: 10px">weighted_return: {{ page_data['weighted_return'] }}</h4>
+            <h4 style="text-align: center;border: 2px solid rgb(0, 0, 138); padding: 5px;margin: 10px">weighted_risk: {{ page_data['weighted_risk'] }}</h4>
+        </div>
+    </div>
+
+    <div id="scatterPlotsContainer" style="display: flex; justify-content: space-around;">
+    <!-- Scatter plot to display restricted efficient frontier -->
+
+        <div>
+            <canvas id="scatterPlot2" width="700" height="600"></canvas>
+        </div>
+        <script>
+            var unres_efficient_frontier = {{ unres_efficient_frontier | tojson | safe }};
+            // 交换 x 和 y 坐标
+            var swappedData2 = unres_efficient_frontier.map(function(point) {
+                return { x: point[1], y: point[0] };
+            });
+        
+            // 散点图数据
+            var scatterChartData2 = {
+                datasets: [{
+                    label: 'Existing Unrestricted Points',
+                    data: swappedData2,
+                    backgroundColor: 'red', // 现有数据点颜色
+                    pointRadius: 5
+                }, {
+                    label: 'Your Portfolio',
+                    data: [], // 初始为空，稍后添加新点
+                    backgroundColor: 'green', // 新数据点颜色
+                    pointRadius: 7 // 新数据点的大小，更显眼
+                }]
+            };
+        
+            // 获取 canvas 元素
+            var ctx2 = document.getElementById('scatterPlot2').getContext('2d');
+        
+            // Create the scatter plot
+            var scatterChart2 = new Chart(ctx2, {
+                type: 'scatter',
+                data: scatterChartData2,
+                options: {
+                    responsive: true, // Ensures responsiveness
+                    maintainAspectRatio: false, // Allows changing the aspect ratio
+                    scales: {
+                        x: {
+                            type: 'linear',
+                            position: 'bottom',
+                            // Dynamically calculate the max value to include all points with some padding
+                            max: Math.max(...swappedData2.map(point => point.x), {{ page_data['weighted_risk'] | tojson | safe }}) * 1.2 // Increased padding
+                        },
+                        y: {
+                            type: 'linear',
+                            position: 'left',
+                            // Dynamically calculate min and max values to include all points with some padding
+                            min: Math.min(...swappedData2.map(point => point.y)) * 1.2,
+                            max: Math.max(...swappedData2.map(point => point.y)) * 1.2  
+                        }
+                    }
+                }
+            });
+        
+            // 添加一个新的数据点
+            scatterChart2.data.datasets[1].data.push({ x: {{ page_data['weighted_risk']}}, y: {{ page_data['weighted_return']}} });
+            scatterChart2.update();
+        </script>
+        </div>
+
+</body>
+
+</html>
+
+{% include 'footer.html' %}

@@ -1,0 +1,103 @@
+{% include 'header.html' %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ page_data.title }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <!-- Define CSS in static/styles.css -->
+    <style>
+        /* Additional CSS for table styling */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        tr:hover {
+            background-color: #ddd;
+        }
+        .container {
+            margin: 20px;
+        }
+    </style>
+</head>
+<br>
+<br>
+<body>
+    {% include 'error_msg.html' %} 
+    <p style="color: rgb(0, 0, 145); font-size: 23px; padding-left: 70px;">Today's Date: {{ today }}</p>
+    
+    <div class="container">
+        {% if g.user %}
+            <p style="font-size: 23px; padding-left: 20px;">Welcome to the page, {{ g.user.username }}!</p>
+        {% endif %}
+
+        <!-- Create a section for different users -->
+        {% if grouped_records %}
+            {% for user_id, user_records in grouped_records.items() %}
+                <h2>User ID: {{ user_id }}</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Record ID</th>
+                            <th>Stock Symbol</th>
+                            <th>Quantity</th>
+                            <th>Average Cost</th>
+                            <th>Total Cost</th>
+                            <th>Current Price</th>
+                            <th>Current Value</th>
+                            <th>PnL</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% set totals = namespace(total_cost=0, total_value=0, total_pnl=0) %}
+                        <!-- Iterate through all records for one user -->
+                        {% for record in user_records %}
+                            {% set record_cost = record.quantity * record.average_cost %}
+                            {% set record_value = record.quantity * record.price %}
+                            {% set record_pnl = record_value - record_cost %}
+                            <tr>
+                                <td>{{ record.record_id }}</td>
+                                <td>{{ record.stock_symbol }}</td>
+                                <td>{{ record.quantity }}</td>
+                                <td>{{ "%.2f"|format(record.average_cost) }}</td>
+                                <td>{{ "%.2f"|format(record_cost) }}</td>
+                                <td>{{ "%.2f"|format(record.price) }}</td>
+                                <td>{{ "%.2f"|format(record_value) }}</td>
+                                <td>{{ "%.2f"|format(record_pnl) }}</td>
+                            </tr>
+                            {% set totals.total_cost = totals.total_cost + record_cost %}
+                            {% set totals.total_value = totals.total_value + record_value %}
+                            {% set totals.total_pnl = totals.total_pnl + record_pnl %}
+                        {% endfor %}
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <th colspan="4">Total for User {{ user_id }}</th>
+                            <th>{{ "%.2f"|format(totals.total_cost) }}</th>
+                            <th></th>
+                            <th>{{ "%.2f"|format(totals.total_value) }}</th>
+                            <th>{{ "%.2f"|format(totals.total_pnl) }}</th>
+                        </tr>
+                    </tfoot>
+                </table>
+            {% endfor %}
+        {% else %}
+            <p>No user has created a portfolio yet.</p>
+        {% endif %}
+    </div>
+
+</body>
+</html>
+{% include 'footer.html' %}

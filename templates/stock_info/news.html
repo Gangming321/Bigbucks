@@ -1,0 +1,108 @@
+{% include 'header.html' %}
+<br>
+{% include 'sidebar.html' %}
+<br><br><br><br>
+{% with messages = get_flashed_messages(category_filter="error") %}
+<!-- 错误消息展示 -->
+  {% if messages %}
+  
+  <div class="container-fluid">
+    <div class="alert alert-warning" role="alert">
+    {% for  message in messages %}
+      {{ message }}<br>
+    {% endfor %}
+    </div>
+  </div>
+
+  {% endif %}
+{% endwith %}
+
+
+
+<form action="/info/main" method="post">
+  <!-- <form action="/info/main" method="post">*/-->
+
+      Ticker:
+      <input type="text" id="ticker" name="ticker" >
+      <input type="submit" name="submit">
+  </form> 
+
+
+
+<style>
+  /* Define styles for container */
+.container {
+  margin: 20px auto;
+  padding: 20px;
+  background-color: #fff;
+  border-radius: 5px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  width: 80%; /* Set width to 80% */
+}
+
+/* Define styles for headings */
+h2 {
+  color: #333;
+}
+
+/* Define styles for list */
+ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+/* Define styles for list items */
+li {
+  margin-bottom: 20px;
+}
+
+/* Define styles for links */
+a {
+  color: #007bff;
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+/* Define styles for summary */
+p {
+  margin-top: 5px;
+  font-size: 16px;
+}
+
+</style>
+<div class="container">
+  <h2>News for {{ symbol.upper() }}</h2>
+  <ul>
+    {% for item in news_items %}
+    <li>
+      <a href="{{ item['url'] }}" target="_blank">{{ item['title'] }}</a>
+      <p>{{ item['summary'] }}</p>
+    </li>
+    {% endfor %}
+  </ul>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // 解析当前URL以获取股票符号
+    var pathArray = window.location.pathname.split('/');
+    var ticker = pathArray[2]; // 假设股票符号总是位于第三个段落
+  
+    // 设置表单的股票符号输入框的值
+    document.getElementById('ticker').value = ticker;
+  
+    // 更新表单的提交action，确保提交到正确的URL
+    document.getElementById('chartForm').onsubmit = function() {
+      this.action = '/info/' + encodeURIComponent(ticker) + '/news';
+    };
+  });
+  </script>
+
+
+
+
+{% include 'footer.html' %}
+

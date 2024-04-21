@@ -1,0 +1,93 @@
+{% include 'header.html' %}
+<br>
+{% include 'sidebar.html' %}
+
+
+  <br><br><br><br>
+{% with messages = get_flashed_messages(category_filter="error") %}
+<!-- 错误消息展示 -->
+  {% if messages %}
+  
+  <div class="container-fluid">
+    <div class="alert alert-warning" role="alert">
+    {% for  message in messages %}
+      {{ message }}<br>
+    {% endfor %}
+    </div>
+  </div>
+
+  {% endif %}
+{% endwith %}
+
+
+
+
+
+  <!-- <div class="row">
+    <div class="form-group row">
+        <label for="symbol" class="col-sm-1 col-form-label d-flex justify-content-end align-items-end">Stock Symbol</label>
+        <div class="col-sm-1">
+          <input type="text" class="form-control" id="symbol" placeholder="symbol" value="{{ page_data['inputValue']}}">
+        </div>
+         <div class="col-sm-1">
+          <button id="retrieve" class="btn btn-primary">Retrieve</button>
+        </div>
+      </div>
+  </div> -->
+
+    <form action="/info/main" method="post">
+  <!-- <form action="/info/main" method="post">*/-->
+
+      Ticker:
+      <input type="text" name="ticker">
+      <input type="submit" name="submit">
+  </form>
+
+
+  <div class="pageelement">
+<!-- additional data -->
+  {% if page_data.stock_data %}
+  <div class="stock-info">
+      <h2>{{ page_data.stock_data['Name'] }} ({{ symbol }})</h2>
+      <p><strong>Sector:</strong> {{ page_data.stock_data['Sector'] }}</p>
+      <p><strong>Industry:</strong> {{ page_data.stock_data['Industry'] }}</p>
+      <p><strong>Market Capitalization:</strong> {{ page_data.stock_data['MarketCapitalization'] }}</p>
+      <p><strong>Price to Earnings Ratio:</strong> {{ page_data.stock_data['PERatio'] }}</p>
+      <p><strong>Earnings per Share:</strong> {{ page_data.stock_data['EPS'] }}</p>
+      <p><strong>Dividend per Share:</strong> {{ page_data.stock_data['DividendPerShare'] }}</p>
+      <p><strong>Dividend Yield:</strong> {{ page_data.stock_data['DividendYield'] }}</p>
+      <p><strong>Stock Exchange:</strong> {{ page_data.stock_data['Exchange'] }}</p>
+      <p><strong>Current Price:</strong> {{ page_data['current_price'] }}</p>
+      <p><strong>Previous Close (Adjusted):</strong> {{ page_data['previous_close'] }}</p>
+      <p><strong>Open:</strong> {{ page_data['open'] }}</p>
+      <p><strong>Volume:</strong> {{ page_data['volume'] }}</p>
+      <p><strong>52-Week High:</strong> {{ page_data.stock_data['52WeekHigh'] }}</p>
+      <p><strong>52-Week Low:</strong> {{ page_data.stock_data['52WeekLow'] }}</p>
+  </div>
+  {% endif %}
+
+  <!-- {% if symbol is defined %}
+  <input type="hidden" id="submittedSymbol" name="submittedSymbol" value="{{symbol}}">
+  <div id="myChart">
+  </div>
+  {% endif %}
+
+</div> -->
+</div>
+<style>
+  .pageelement {
+    
+    padding: 40px;
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    width: 40%; 
+    height:fit-content
+}
+
+</style>
+
+
+
+
+{% include 'footer.html' %}

@@ -1,0 +1,179 @@
+{% include 'header.html' %} 
+<br><br>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ page_data.title }}</title>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        tr:hover {
+            background-color: #ddd;
+        }
+        .container {
+            margin: 20px;
+        }
+        .back-button {
+            background-color: #004085;
+            border: none;
+            font-size: 18px;
+            color: white;
+            padding: 12px;
+            text-align: center;
+            display: inline-block;
+            margin-top: 20px;
+            border-radius: 8px;
+        }
+    
+        .back-button:hover {
+            background-color: #0266d0; 
+        }
+    </style>
+</head>
+<body>
+    {% include 'error_msg.html' %} 
+    <!-- <p style="color: rgb(0, 0, 145); font-size: 23px; padding-left: 70px;">Today's Date: {{ today }}</p> -->
+
+<h2>User Stock List</h2>
+
+    <div class="container">
+        <h2>All Users Combined Summary by Ticker Symbol</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Ticker Symbol</th>
+                    <th>Total Quantity</th>
+                    <th>Current Price</th> <!-- Add new header for current price -->
+                    <th>Weighted Average Price</th>
+                    <th>Total Cost</th>
+                    <th>Total Value</th>
+                    <th>Total PnL</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for symbol, summary in ticker_summary.items() %}
+                <tr>
+                    <td>{{ symbol }}</td>
+                    <td>{{ summary.total_quantity }}</td>
+                    <td>${{ "%.2f"|format(summary.current_price) }}</td> <!-- Add current price here -->
+                    <td>${{ "%.2f"|format(summary.weighted_avg_price) }}</td>
+                    <td>${{ "%.2f"|format(summary.total_cost) }}</td>
+                    <td>${{ "%.2f"|format(summary.total_value) }}</td>
+                    {% if summary.total_pnl >= 0 %}
+                        <td>${{ "%.2f"|format(summary.total_pnl) }}</td>
+                    {% else %}
+                        <td>-${{ "%.2f"|format(-summary.total_pnl) }}</td>
+                    {% endif %}
+                </tr>
+                {% endfor %}
+            </tbody>
+            <tfoot>
+                <tr>
+                    <th colspan="4">Total for All Users</th>
+                    <th>${{ "%.2f"|format(total_for_all_users.total_cost) }}</th> <!-- Total Cost -->
+                    <th>${{ "%.2f"|format(total_for_all_users.total_value) }}</th> <!-- Total Value -->
+                    {% if total_for_all_users.total_pnl >= 0 %}
+                        <th>${{ "%.2f"|format(total_for_all_users.total_pnl) }}</th> <!-- Total PnL -->
+                    {% else %}
+                        <th>-${{ "%.2f"|format(-total_for_all_users.total_pnl) }}</th> <!-- Total PnL -->
+                    {% endif %}
+                </tr>
+            </tfoot>           
+        </table>
+    </div>
+
+
+    <div class="container">
+        <!-- {% if g.user %}
+            <p style="font-size: 23px; padding-left: 20px;">Welcome to the overview page, {{ g.user.username }}!</p>
+        {% endif %} -->
+
+        <!-- Create a section for different users -->
+        {% if grouped_records %}
+            {% for user_id, user_records in grouped_records.items() %}
+                <h2>User ID: {{ user_id }}</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Record ID</th>
+                            <th>Stock Symbol</th>
+                            <th>Quantity</th>
+                            <th>Average Cost</th>
+                            <th>Total Cost</th>
+                            <th>Current Price</th>
+                            <th>Current Value</th>
+                            <th>PnL</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% set totals = namespace(total_cost=0, total_value=0, total_pnl=0) %}
+                        <!-- Iterate through all records for one user -->
+                        {% for record in user_records %}
+                            {% set record_cost = record.quantity * record.average_cost %}
+                            {% set record_value = record.quantity * record.price %}
+                            {% set record_pnl = record_value - record_cost %}
+                            <tr>
+                                <td>{{ record.record_id }}</td>
+                                <td>{{ record.stock_symbol }}</td>
+                                <td>{{ record.quantity }}</td>
+                                <td>${{ "%.2f"|format(record.average_cost) }}</td>
+                                <td>${{ "%.2f"|format(record_cost) }}</td>
+                                <td>${{ "%.2f"|format(record.price) }}</td>
+                                <td>${{ "%.2f"|format(record_value) }}</td>
+                                {% if record_pnl >= 0 %}
+                                    <td>${{ "%.2f"|format(record_pnl) }}</td>
+                                {% else %}
+                                    <td>-${{ "%.2f"|format(-record_pnl) }}</td>
+                                {% endif %}
+                            </tr>
+                            {% set totals.total_cost = totals.total_cost + record_cost %}
+                            {% set totals.total_value = totals.total_value + record_value %}
+                            {% set totals.total_pnl = totals.total_pnl + record_pnl %}
+                        {% endfor %}
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <th colspan="4">Total for User {{ user_id }}</th>
+                            <th>${{ "%.2f"|format(totals.total_cost) }}</th>
+                            <th></th>
+                            <th>${{ "%.2f"|format(totals.total_value) }}</th>
+                            {% if totals.total_pnl >= 0 %}
+                                <th>${{ "%.2f"|format(totals.total_pnl) }}</th>
+                            {% else %}
+                                <th>-${{ "%.2f"|format(-totals.total_pnl) }}</th>
+                            {% endif %}
+                        </tr>
+                    </tfoot>
+                </table>
+            {% endfor %}
+        {% else %}
+            <p>No user has created a portfolio yet.</p>
+        {% endif %}
+    </div>
+
+</body>
+</html>
+
+
+<br>
+
+<button onclick="window.location.href='/admin'" class="back-button">Go back to /admin</button>
+
+
+{% include 'footer.html' %}
+

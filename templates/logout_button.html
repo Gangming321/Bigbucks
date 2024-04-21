@@ -1,0 +1,10 @@
+<!-- 创建按钮 -->
+<button id="logoutButton">Logout</button>
+
+<!-- JavaScript来处理点击事件 -->
+<script>
+    document.getElementById('logoutButton').onclick = function() {
+        // 当按钮被点击时，页面跳转到/logout
+        window.location.href = '/auth/logout';
+    };
+</script>

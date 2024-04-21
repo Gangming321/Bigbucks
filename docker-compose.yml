@@ -1,0 +1,9 @@
+version: '3.8'
+services:
+  web:
+    image: bigbucks:0.0.2
+    ports:
+      - "5001:5001"
+    volumes:
+      # - .:/app
+      - ./bigbucksdb.db:/app/bigbucksdb.db

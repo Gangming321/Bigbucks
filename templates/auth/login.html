@@ -1,0 +1,50 @@
+
+{% include 'header.html' %} 
+<br>
+<br>
+<br><br>
+
+
+<div class="title_1" style="  text-align: center; margin-top: 50px;">
+  <h2   style="font-size: 36px;
+  color: #333;">Meet your fortune</h2>
+  <h3 style="font-size: 24px;
+  color: #555;
+  margin-top: 10px;">Log in</h3>
+</div>
+
+<br>
+
+{% include 'error_msg.html' %} 
+
+<br>
+<section class="register" style="  margin: 0 auto; width: 50%;">
+  <form method="post">
+    <label for="username">Username</label>
+    <input name="username" id="username" required>
+    <br>
+    <br>
+    <label for="password">Password</label>
+    <input type="password" name="password" id="password" required>
+    <br>
+    <br>
+    <input type="submit" value="Log In">
+    <!-- 创建按钮 -->
+  </form>
+
+  <button id="RegisterButton" >New User?</button>
+  <!-- JavaScript来处理点击事件 -->
+  <script>
+    document.getElementById('RegisterButton').onclick = function() {
+          // 当按钮被点击时，页面跳转到/register
+          window.location.href = '/auth/register';
+      };
+  </script>
+</section>
+
+
+
+
+<br>
+
+{% include 'footer_no_logout.html' %}

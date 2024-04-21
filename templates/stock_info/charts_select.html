@@ -1,0 +1,67 @@
+{% include 'header.html' %}
+<br>
+{% include 'sidebar.html' %}
+<br>
+{% block content %}
+ <h2>charting feature</h2>
+  <form id="chartForm" method="post" action="">
+    <label for="stockSymbol">Ticker:</label>
+    <input type="text" name="stockSymbol" id="stockSymbol" required>
+    <select id="chart_type" name="chart_type">
+        <option value="Historical">Historical</option>
+        <option value="Simple Return">Simple Return</option>
+        <option value="Yesterday vs Today">Yesterday vs Today</option>
+        <option value="Histogram of Simple Returns">Histogram of Simple Returns</option>
+        <option value="Daily Returns vs S&P500">Daily Returns vs S&P500</option>
+        <option value="Daily % Change vs S&P500">Daily % Change vs S&P500</option>
+        <option value="Scatter Graph of X vs S&P500">Scatter Graph of X vs S&P500</option>
+        <option value="Historical Volume">Historical Volume</option>
+        <option value="Volume Change">Volume Change</option>
+        <option value="Volume Change vs Price Change">Volume Change vs Price Change</option>
+    </select>
+    <input type="submit" value="Draw Chart">
+  </form>
+
+  <script>
+  document.getElementById('chartForm').onsubmit = function() {
+    var stockSymbol = document.getElementById('stockSymbol').value;
+    this.action = '/info/' + encodeURIComponent(stockSymbol) + '/adv_chart';
+  };
+  </script>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // 解析当前URL以获取股票符号
+    var pathArray = window.location.pathname.split('/');
+    var stockSymbol = pathArray[2]; // 假设股票符号总是位于第三个段落
+  
+    // 设置表单的股票符号输入框的值
+    document.getElementById('stockSymbol').value = stockSymbol;
+  
+    // 更新表单的提交action，确保提交到正确的URL
+    document.getElementById('chartForm').onsubmit = function() {
+      this.action = '/info/' + encodeURIComponent(stockSymbol) + '/adv_chart';
+    };
+  });
+  </script>
+  
+
+  {% if price %}
+    <div role="alert">
+      <label>Stock: {{ stockSymbol }}</label>
+      <label>Price: {{ price }} USD</label>
+    </div>
+    <script src="https://cdn.plot.ly/plotly-2.15.0.min.js"></script>
+    <script src="../static/stock.js"></script>  <!--该写什么-->
+    <script>
+      makeplot("{{ stockSymbol }}", "{{ chart_type }}")
+    </script>
+  {% endif %}
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js" integrity="sha384-w76AqPfDkMBDXo30jS1Sgez6pr3x5MlQ1ZAGC+nuZB+EYdgRZgiwxhTBTkF7CXvN" crossorigin="anonymous"></script>
+
+
+{% endblock %}
+
+{% include 'footer.html' %}

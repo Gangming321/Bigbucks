@@ -1,0 +1,222 @@
+{% include 'header.html' %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ page_data.title }}</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+        }
+        .container {
+            margin: 20px;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border: 1px solid #ccc;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .container h2 {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+        
+        .container p {
+            font-size: 20px;
+            margin: 0;
+        }
+        
+        .container p strong {
+            font-weight: bold;
+            margin-right: 5px;
+        }
+        
+        .container p.value {
+            font-size: 18px;
+            margin-top: 5px;
+        }
+        
+        .container p.positive {
+            color: green;
+        }
+        
+        .container p.negative {
+            color: red;
+        }
+        
+        .container1 {
+            margin: 20px;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+   
+        .error-msg {
+            color: #dc3545;
+        }
+
+        .container1 {
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .container1 h2 {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+        
+        .container1 p {
+            font-size: 16px;
+            margin-bottom: 5px;
+        }
+
+
+
+
+    </style>
+
+<br>
+<br>
+<body>
+    {% include 'error_msg.html' %} 
+
+    <!-- <p>Today's Date: <span> {{ page_data.date }} </span></p> -->
+    <div class="container">
+        {% if g.user %}
+        <p style="font-size: 23px; padding-left: 20px;">Today's Date: <span id="current-date">Loading date...</span></p>
+        <p style="font-size: 23px; padding-left: 20px;">Welcome to the page, {{ g.user.username }}!</p>
+        {% endif %}
+    </div>
+    
+    <div class="container">
+        <h2>Portfolio Summary</h2>
+        
+        <p><strong>Portfolio Cost:</strong> ${{ "%.2f"|format(portfolio_summary['portfolio_cost']) }}</p>
+        <p><strong>Portfolio Value:</strong> ${{ "%.2f"|format(portfolio_summary['portfolio_value']) }}</p>
+        {% if portfolio_summary['portfolio_pnl'] < 0 %}
+            <p><strong>Portfolio PnL:</strong> -${{ "%.2f"|format(-portfolio_summary['portfolio_pnl']) }}</p>
+        {% else %}
+            <p><strong>Portfolio PnL:</strong> ${{ "%.2f"|format(portfolio_summary['portfolio_pnl']) }}</p>
+        {% endif %}
+        
+    </div>
+    <div class="container1">
+        <h2>Position</h2>
+
+        {% if records %}
+            {% for record in records %}
+            <div class="record-item" data-symbol="{{ record['stock_symbol'] }}" data-quantity="{{ record['quantity'] }}" data-average-cost="{{ record['average_cost'] }}">
+                    <p><strong>Stock:</strong> {{ record['name'] }}</p>
+                    <p><strong>Ticker:</strong> {{ record['stock_symbol'] }}</p>
+                    <p><strong>Quantity:</strong> {{ record['quantity'] }}</p>
+                    <p><strong>Average Cost:</strong> ${{ "%.2f"|format(record['average_cost']) }}</p>
+                    <!-- Calculate Total Cost -->
+                    <p><strong>Total Cost:</strong> ${{ "%.2f"|format(record['total_cost']) }}</p>
+                    <p><strong>Current Price:</strong> ${{ "%.2f"|format(record['current_price']) }}</p>
+                    <!-- Calculate Total Value -->
+                    <p><strong>Current Value:</strong> ${{ "%.2f"|format(record['current_value']) }}</span></p>
+                    <!-- Calculate Gain/Loss -->
+                    {% if record['PnL'] < 0 %}
+                        <p><strong>PnL:</strong> -${{ "%.2f"|format(-record['PnL']) }}</p>
+                    {% else %}
+                        <p><strong>PnL:</strong> ${{ "%.2f"|format(record['PnL']) }}</p>
+                    {% endif %}
+                    <br>
+                </div>  
+            {% endfor %}
+        {% else %}
+            <p>No portfolio records found.</p>
+        {% endif %}
+    </div>
+
+
+
+    <script>
+        // Create a date object, which sets to today by default
+        const today = new Date();
+    
+        // Change the date today to YYYY-MM-DD format.
+        const dateString = today.getFullYear() + '-' + 
+          (today.getMonth() + 1).toString().padStart(2, '0') + '-' + 
+          today.getDate().toString().padStart(2, '0');
+    
+        // Set the formatted date string to the "current-date" span.
+        document.getElementById('current-date').textContent = dateString;
+    </script>
+
+    <script>
+        // 格式化货币显示，确保负号在货币符号之前
+        function formatCurrency(value) {
+            return value < 0 ? `-$${Math.abs(value).toFixed(2)}` : `$${value.toFixed(2)}`;
+        }
+    
+        document.addEventListener('DOMContentLoaded', function() {
+            let totalCost = 0;
+            let totalValue = 0;
+            let totalPnL = 0;
+    
+            document.querySelectorAll('.record-item').forEach(item => {
+                const symbol = item.dataset.symbol;
+                const quantity = parseFloat(item.dataset.quantity);
+                const averageCost = parseFloat(item.dataset.averageCost);
+                totalCost += quantity * averageCost;
+                fetchPrice(symbol, dateString, item, quantity, averageCost);
+            });
+    
+            async function fetchPrice(symbol, date, item, quantity, averageCost) {
+                try {
+                    const response = await fetch(`/trade/pricing/${symbol}/${date}`);
+                    if (!response.ok) {
+                        throw new Error('Network error');
+                    }
+                    const data = await response.json();
+                    if (data.error) {
+                        item.querySelector('.price-display').textContent = 'Error: ' + data.error;
+                        return;
+                    }
+                    const currentPrice = parseFloat(data.adjClosePrice);
+                    const currentValue = quantity * currentPrice;
+                    const pnl = currentValue - (quantity * averageCost);
+    
+                    // 累加到总价值和总PnL
+                    totalValue += currentValue;
+                    totalPnL += pnl;
+    
+                    item.querySelector('.price-display').textContent = formatCurrency(currentPrice);
+                    item.querySelector('.current-value-display').textContent = formatCurrency(currentValue);
+                    item.querySelector('.pnl-display').textContent = formatCurrency(pnl);
+    
+                    // Update the portfolio summary
+                    updatePortfolioSummary();
+                } catch (error) {
+                    console.error('Error fetching price for symbol:', symbol, error);
+                    item.querySelector('.price-display').textContent = 'Error fetching price';
+                }
+            }
+    
+            function updatePortfolioSummary() {
+                document.getElementById('total-cost-summary').textContent = formatCurrency(totalCost);
+                document.getElementById('total-value-summary').textContent = formatCurrency(totalValue);
+                document.getElementById('total-pnl-summary').textContent = formatCurrency(totalPnL);
+            }
+        });
+    </script>
+    
+
+</body>
+</html>
+</head>
+
+{% include 'footer.html' %}
+
+
